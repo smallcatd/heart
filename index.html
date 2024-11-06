@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fireworks and Heart Animation</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: black;
+        }
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <script>
+        const CANVAS_WIDTH = 1080;
+        const CANVAS_HEIGHT = 600;
+        const CANVAS_CENTER_X = CANVAS_WIDTH / 2;
+        const CANVAS_CENTER_Y = CANVAS_HEIGHT / 2;
+        const IMAGE_ENLARGE = 12;
+        const HEART_COLOR = "pink";
+
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = CANVAS_WIDTH;
+        canvas.height = CANVAS_HEIGHT;
+
+        class Firework {
+            constructor(color, speed, width, height) {
+                this.radius = Math.floor(Math.random() * 2) + 2;
+                this.color = color;
+                this.speed = speed;
+                this.status = 0;
+                this.nParticle = Math.floor(Math.random() * 21) + 80;
+                this.center = [Math.floor(Math.random() * (width - 15)), Math.floor(Math.random() * (height - 15))];
+                this.oneParticle = [];
+                this.rotTheta = Math.random() * 2 * Math.PI;
+                this.ellipsePara = [Math.floor(Math.random() * 11) + 30, Math.floor(Math.random() * 11) + 20];
+
+                const theta = 2 * Math.PI / this.nParticle;
+                for (let i = 0; i < this.nParticle; i++) {
+                    const t = Math.random() * (1.0 / 16) - (1.0 / 16);
+                    const x = this.ellipsePara[0] * Math.cos(theta * i + t);
+                    const y = this.ellipsePara[1] * Math.sin(theta * i + t);
+                    const xx = x * Math.cos(this.rotTheta) - y * Math.sin(this.rotTheta);
+                    const yy = y * Math.cos(this.rotTheta) + x * Math.sin(this.rotTheta);
+                    this.oneParticle.push([xx, yy]);
+                }
+
+                this.curParticle = this.oneParticle.slice();
+                this.extend();
+            }
+
+            extend() {
+                const self = this;
+                function update() {
+                    if (self.status < 100) {
+                        self.status += 1;
+                        self.curParticle = self.oneParticle.map(one => [one[0] * self.status / 100, one[1] * self.status / 100]);
+                        setTimeout(update, self.speed / 50);
+                    }
+                }
+                update();
+            }
+
+            explode() {
+                this.extend();
+            }
+        }
+
+        function colorChange(fire) {
+            const rgb = fire.color.match(/.{2}/g);
+            const cs = fire.status;
+
+            const f = (x, c) => Math.floor(parseInt(x, 16) * (100 - c) / 30).toString(16).padStart(2, '0');
+            if (cs > 70) {
+                const ccr = f(rgb[0], cs);
+                const ccg = f(rgb[1], cs);
+                const ccb = f(rgb[2], cs);
+                return `#${ccr}${ccg}${ccb}`;
+            } else {
+                return fire.color;
+            }
+        }
+
+        const Fireworks = [];
+        const maxFireworks = 8;
+
+        function appendFirework(n = 1) {
+            if (n > maxFireworks || Fireworks.length > maxFireworks) return;
+            if (n === 1) {
+                const cl = `#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`;
+                const a = new Firework(cl, Math.random() * 2 + 1.5, CANVAS_WIDTH, CANVAS_HEIGHT);
+                Fireworks.push({ particle: a, points: [] });
+                a.explode();
+            } else {
+                appendFirework();
+                appendFirework(n - 1);
+            }
+        }
+
+        function show() {
+            ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+            Fireworks.forEach(p => {
+                p.points.forEach(pp => ctx.clearRect(pp.x, pp.y, pp.size, pp.size));
+                p.points = [];
+            });
+
+            Fireworks.forEach(p => {
+                const oneP = p.particle;
+                if (oneP.status === 100) {
+                    Fireworks.splice(Fireworks.indexOf(p), 1);
+                    appendFirework();
+                } else {
+                    const li = oneP.curParticle.map(cp => [Math.floor(cp[0] * 2) + oneP.center[0], Math.floor(cp[1] * 2) + oneP.center[1]]);
+                    const color = colorChange(oneP);
+                    li.forEach(pp => {
+                        const x = pp[0] - oneP.radius;
+                        const y = pp[1] - oneP.radius;
+                        const size = oneP.radius * 2;
+                        p.points.push({ x, y, size });
+                        ctx.fillStyle = color;
+                        ctx.beginPath();
+                        ctx.arc(x + oneP.radius, y + oneP.radius, oneP.radius, 0, 2 * Math.PI);
+                        ctx.fill();
+                    });
+                }
+            });
+
+            setTimeout(show, 10);
+        }
+
+        function heartFunction(t, shrinkRatio = IMAGE_ENLARGE) {
+            const x = 16 * Math.pow(Math.sin(t), 3);
+            const y = -(13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t));
+
+            return [
+                x * shrinkRatio + CANVAS_CENTER_X,
+                y * shrinkRatio + CANVAS_CENTER_Y
+            ];
+        }
+
+        function scatterInside(x, y, beta = 0.15) {
+            const ratioX = -beta * Math.log(Math.random());
+            const ratioY = -beta * Math.log(Math.random());
+
+            const dx = ratioX * (x - CANVAS_CENTER_X);
+            const dy = ratioY * (y - CANVAS_CENTER_Y);
+
+            return [x - dx, y - dy];
+        }
+
+        function shrink(x, y, ratio) {
+            const force = -1 / Math.pow(Math.pow(x - CANVAS_CENTER_X, 2) + Math.pow(y - CANVAS_CENTER_Y, 2), 0.6);
+            const dx = ratio * force * (x - CANVAS_CENTER_X);
+            const dy = ratio * force * (y - CANVAS_CENTER_Y);
+            return [x - dx, y - dy];
+        }
+
+        function curve(p) {
+            return 4 * (2 * Math.sin(4 * p)) / (2 * Math.PI);
+        }
+
+        class Heart {
+            constructor(generateFrame = 20) {
+                this._points = new Set();
+                this._edgeDiffusionPoints = new Set();
+                this._centerDiffusionPoints = new Set();
+                this.allPoints = {};
+                this.build(2000);
+
+                this.randomHalo = 1000;
+                this.generateFrame = generateFrame;
+                for (let frame = 0; frame < generateFrame; frame++) {
+                    this.calc(frame);
+                }
+            }
+
+            build(number) {
+                for (let i = 0; i < number; i++) {
+                    const t = Math.random() * 2 * Math.PI;
+                    const [x, y] = heartFunction(t);
+                    this._points.add([x, y]);
+                }
+
+                this._points.forEach(([_x, _y]) => {
+                    for (let i = 0; i < 3; i++) {
+                        const [x, y] = scatterInside(_x, _y, 0.05);
+                        this._edgeDiffusionPoints.add([x, y]);
+                    }
+                });
+
+                const pointList = Array.from(this._points);
+                for (let i = 0; i < 4000; i++) {
+                    const [x, y] = scatterInside(...random.choice(pointList), 0.17);
+                    this._centerDiffusionPoints.add([x, y]);
+                }
+            }
+
+            calcPosition(x, y, ratio) {
+                return [x, y];
+            }
+
+            calc(generateFrame) {
+                const ratio = 10 * curve(generateFrame / 10 * Math.PI);
+
+                const haloRadius = Math.floor(4 + 6 * (1 + curve(generateFrame / 10 * Math.PI)));
+                const haloNumber = Math.floor(3000 + 4000 * Math.abs(curve(generateFrame / 10 * Math.PI) ** 2));
+
+                const allPoints = [];
+
+                const heartHaloPoint = new Set();
+                for (let i = 0; i < haloNumber; i++) {
+                    const t = Math.random() * 2 * Math.PI;
+                    const [x, y] = heartFunction(t, 11);
+                    const [sx, sy] = shrink(x, y, haloRadius);
+                    if (!heartHaloPoint.has([sx, sy])) {
+                        heartHaloPoint.add([sx, sy]);
+                        const [rx, ry] = [sx + Math.floor(Math.random() * 23) - 11, sy + Math.floor(Math.random() * 23) - 11];
+                        const size = Math.floor(Math.random() * 2) + 1;
+                        allPoints.push([rx, ry, size]);
+                    }
+                }
+
+                this._points.forEach(([x, y]) => {
+                    const [sx, sy] = this.calcPosition(x, y, ratio);
+                    const size = Math.floor(Math.random() * 3) + 1;
+                    allPoints.push([sx, sy, size]);
+                });
+
+                this._centerDiffusionPoints.forEach(([x, y]) => {
+                    const [sx, sy] = this.calcPosition(x, y, ratio);
+                    const size = Math.floor(Math.random() * 2) + 1;
+                    allPoints.push([sx, sy, size]);
+                });
+
+                this.allPoints[generateFrame] = allPoints;
+            }
+
+            render(renderFrame) {
+                const points = this.allPoints[renderFrame % this.generateFrame];
+                points.forEach(([x, y, size]) => {
+                    ctx.fillStyle = HEART_COLOR;
+                    ctx.fillRect(x, y, size, size);
+                });
+            }
+        }
+
+        function draw(heart, frame = 0) {
+            ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+            heart.render(frame);
+            setTimeout(() => draw(heart, frame + 1), 160);
+        }
+
+        appendFirework(maxFireworks);
+        show();
+        const heart = new Heart();
+        draw(heart);
+    </script>
+</body>
+</html>
