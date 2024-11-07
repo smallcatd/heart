@@ -131,7 +131,7 @@ function draw_heart(context, scale, x_padding, y_padding) {
 }
 
 function draw_point(context, x, y, redius) {
-    context.fillStyle = point_colors[Math.ceil(Math.random() * point_colors.length)];
+    context.fillStyle = "#FFC0CB";
     context.beginPath();
     context.arc(x - redius/2, y, redius/2, redius, 2*Math.PI, false);
     context.fill();
