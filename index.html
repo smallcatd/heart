@@ -46,7 +46,7 @@ function render( context ){
     context.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT );
 
     // 绘制随机心
-    var num = Math.random() * 40;
+    var num = Math.random() * 100;
     for (var i = 0; i < num; i++) {
         var scale = Math.random() * 1;
         var x_padding = Math.random() * CANVAS_WIDTH;
@@ -58,7 +58,7 @@ function render( context ){
     var xp = CANVAS_WIDTH / 2;
     var yp = CANVAS_HEIGHT / 2;
 
-    var scale = 20 * (1 + Math.random()/4);
+    var scale = 20;
     var types = [
         {count: 1000,   detal: 4,   rand_type: "unin",  abs: false},  // 散落到外
         {count: 10000, detal: 0.7, rand_type: "unin",  abs: false},  // 勾勒轮廓
@@ -72,8 +72,8 @@ function render( context ){
     for (var j = 0; j < types.length; j++) {
         var points = gen_heart_poin(types[j].count, types[j].detal, types[j].rand_type, types[j].abs);
         for (var i = 0; i < points.length; i++) {
-            var x = points[i].x  + xp;
-            var y = points[i].y  + yp;
+            var x = points[i].x * scale + xp;
+            var y = points[i].y * scale + yp;
             draw_point(context, x , y , 2);
         }
     }
@@ -101,17 +101,17 @@ function gen_heart_poin(count, detal, rand_type, abs) {
             d2 = Math.abs(d2);
         }
         
-        // if (x > 0) {
-        //     x = x - d1;
-        // } else {
-        //     x = x + d1;
-        // }
+        if (x > 0) {
+            x = x - d1;
+        } else {
+            x = x + d1;
+        }
 
-        // if (y > 0) {
-        //     y = y - d2;
-        // } else {
-        //     y = y + d2;
-        // }
+        if (y > 0) {
+            y = y - d2;
+        } else {
+            y = y + d2;
+        }
 
         points.push({x: x, y: y});
     }
@@ -150,7 +150,7 @@ function normalRandom(mean, std) {
     let normal = mean + (u * c) * std;
     return normal;
 }
-
 </script>
 </body>
 </html>
+
