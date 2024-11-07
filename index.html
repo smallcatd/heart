@@ -1,3 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fireworks & Heart Animation</title>
+    <style>
+        body { margin: 0; padding: 0; background-color: black; }
+        canvas { display: block; }
+    </style>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+<script>
+// Canvas setup
 const CANVAS_WIDTH = 1080;
 const CANVAS_HEIGHT = 600;
 const CANVAS_CENTER_X = CANVAS_WIDTH / 2;
@@ -96,3 +111,7 @@ const ctx = canvas.getContext("2d");
 
 createFireworks();
 animate(ctx);
+
+</script>
+</body>
+</html>
