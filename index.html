@@ -46,7 +46,7 @@ function render( context ){
     context.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT );
 
     // 绘制随机心
-    var num = Math.random() * 100;
+    var num = Math.random() * 40;
     for (var i = 0; i < num; i++) {
         var scale = Math.random() * 1;
         var x_padding = Math.random() * CANVAS_WIDTH;
@@ -58,7 +58,7 @@ function render( context ){
     var xp = CANVAS_WIDTH / 2;
     var yp = CANVAS_HEIGHT / 2;
 
-    var scale = 20;
+    var scale = 10;
     var types = [
         {count: 1000,   detal: 4,   rand_type: "unin",  abs: false},  // 散落到外
         {count: 10000, detal: 0.7, rand_type: "unin",  abs: false},  // 勾勒轮廓
