@@ -117,7 +117,7 @@ const heart = new Heart();
 
 function loop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    if (fireworks.length < 2) {
+    if (fireworks.length < 1) {
         fireworks.push(new Firework(`#${Math.floor(Math.random() * 16777215).toString(16)}`, Math.random() * 2 + 1.5, canvas.width, canvas.height));
     }
     heart.render(Date.now() % 20);
