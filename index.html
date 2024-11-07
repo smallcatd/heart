@@ -46,7 +46,7 @@ function render( context ){
     context.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT );
 
     // 绘制随机心
-    var num = Math.random() * 100;
+    var num = Math.random() * 40;
     for (var i = 0; i < num; i++) {
         var scale = Math.random() * 1;
         var x_padding = Math.random() * CANVAS_WIDTH;
@@ -72,8 +72,8 @@ function render( context ){
     for (var j = 0; j < types.length; j++) {
         var points = gen_heart_poin(types[j].count, types[j].detal, types[j].rand_type, types[j].abs);
         for (var i = 0; i < points.length; i++) {
-            var x = points[i].x * scale + xp;
-            var y = points[i].y * scale + yp;
+            var x = points[i].x  + xp;
+            var y = points[i].y  + yp;
             draw_point(context, x , y , 2);
         }
     }
