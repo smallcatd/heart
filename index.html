@@ -19,148 +19,148 @@
 <body>
 <canvas id="canvas"></canvas>
 <script>
-// HTML5 Canvas和上下文
-const canvas = document.getElementById("canvas");
-const ctx = canvas.getContext("2d");
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-
-const fireworks = [];  // 烟花数组
-const hearts = [];     // 心形动画数组
-
-// 粒子类（用于烟花）
-class Particle {
-    constructor(x, y, color, size) {
-        this.x = x;
-        this.y = y;
-        this.color = color;
-        this.size = size;
-        this.alpha = 1;
-    }
-
-    draw(ctx) {
-        ctx.save();
-        ctx.globalAlpha = this.alpha;
-        ctx.fillStyle = this.color;
-        ctx.shadowBlur = 10;
-        ctx.shadowColor = this.color;
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
-    }
-
-    update() {
-        this.alpha -= 0.02;
-        this.size += 0.1;
-    }
-}
-
-// 烟花类
-class Firework {
-    constructor(x, y) {
-        this.x = x;
-        this.y = y;
-        this.particles = [];
-        this.createParticles();
-    }
-
-    createParticles() {
-        const particleCount = Math.random() * 100 + 50;
-        for (let i = 0; i < particleCount; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const speed = Math.random() * 3 + 1;
-            const color = `hsl(${Math.random() * 360}, 100%, 70%)`;
-            const size = Math.random() * 3 + 1;
-            const particle = new Particle(this.x, this.y, color, size);
-            particle.velocityX = Math.cos(angle) * speed;
-            particle.velocityY = Math.sin(angle) * speed;
-            this.particles.push(particle);
+    // HTML5 Canvas和上下文
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    
+    const fireworks = [];  // 烟花数组
+    const hearts = [];     // 心形动画数组
+    
+    // 粒子类（用于烟花）
+    class Particle {
+        constructor(x, y, color, size) {
+            this.x = x;
+            this.y = y;
+            this.color = color;
+            this.size = size;
+            this.alpha = 1;
         }
-    }
-
-    draw(ctx) {
-        this.particles.forEach(particle => particle.draw(ctx));
-    }
-
-    update() {
-        this.particles.forEach(particle => {
-            particle.x += particle.velocityX;
-            particle.y += particle.velocityY;
-            particle.update();
-        });
-
-        this.particles = this.particles.filter(p => p.alpha > 0);
-    }
-}
-
-// 心形类
-class Heart {
-    constructor() {
-        this.points = this.generateHeartPoints();
-    }
-
-    generateHeartPoints() {
-        const points = [];
-        const centerX = canvas.width / 2;
-        const centerY = canvas.height / 2;
-        const enlarge = 15;
-
-        for (let t = 0; t < 2 * Math.PI; t += 0.01) {
-            const x = centerX + 16 * Math.sin(t) ** 3 * enlarge;
-            const y = centerY - (13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t)) * enlarge;
-            points.push({ x, y });
-        }
-
-        return points;
-    }
-
-    draw(ctx) {
-        this.points.forEach(point => {
-            const size = Math.random() * 2 + 1;
-            ctx.fillStyle = "pink";
+    
+        draw(ctx) {
+            ctx.save();
+            ctx.globalAlpha = this.alpha;
+            ctx.fillStyle = this.color;
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = this.color;
             ctx.beginPath();
-            ctx.arc(point.x, point.y, size, 0, Math.PI * 2);
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
             ctx.fill();
-        });
+            ctx.restore();
+        }
+    
+        update() {
+            this.alpha -= 0.02;
+            this.size += 0.1;
+        }
     }
-}
-
-// 动画循环
-function animate() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // 绘制心形背景
-    hearts.forEach(heart => heart.draw(ctx));
-
-    // 绘制烟花
-    fireworks.forEach(firework => {
-        firework.draw(ctx);
-        firework.update();
+    
+    // 烟花类
+    class Firework {
+        constructor(x, y) {
+            this.x = x;
+            this.y = y;
+            this.particles = [];
+            this.createParticles();
+        }
+    
+        createParticles() {
+            const particleCount = Math.random() * 100 + 50;
+            for (let i = 0; i < particleCount; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const speed = Math.random() * 3 + 1;
+                const color = `hsl(${Math.random() * 360}, 100%, 70%)`;
+                const size = Math.random() * 3 + 1;
+                const particle = new Particle(this.x, this.y, color, size);
+                particle.velocityX = Math.cos(angle) * speed;
+                particle.velocityY = Math.sin(angle) * speed;
+                this.particles.push(particle);
+            }
+        }
+    
+        draw(ctx) {
+            this.particles.forEach(particle => particle.draw(ctx));
+        }
+    
+        update() {
+            this.particles.forEach(particle => {
+                particle.x += particle.velocityX;
+                particle.y += particle.velocityY;
+                particle.update();
+            });
+    
+            this.particles = this.particles.filter(p => p.alpha > 0);
+        }
+    }
+    
+    // 心形类
+    class Heart {
+        constructor() {
+            this.points = this.generateHeartPoints();
+        }
+    
+        generateHeartPoints() {
+            const points = [];
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const enlarge = 15;
+    
+            for (let t = 0; t < 2 * Math.PI; t += 0.01) {
+                const x = centerX + 16 * Math.sin(t) ** 3 * enlarge;
+                const y = centerY - (13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t)) * enlarge;
+                points.push({ x, y });
+            }
+    
+            return points;
+        }
+    
+        draw(ctx) {
+            this.points.forEach(point => {
+                const size = Math.random() * 2 + 1;
+                ctx.fillStyle = "pink";
+                ctx.beginPath();
+                ctx.arc(point.x, point.y, size, 0, Math.PI * 2);
+                ctx.fill();
+            });
+        }
+    }
+    
+    // 动画循环
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+        // 绘制心形背景
+        hearts.forEach(heart => heart.draw(ctx));
+    
+        // 绘制烟花
+        fireworks.forEach(firework => {
+            firework.draw(ctx);
+            firework.update();
+        });
+    
+        fireworks.forEach((firework, index) => {
+            if (firework.particles.length === 0) fireworks.splice(index, 1);
+        });
+    
+        requestAnimationFrame(animate);
+    }
+    
+    // 创建心形并添加到hearts数组中
+    function createHeart() {
+        const heart = new Heart();
+        hearts.push(heart);
+    }
+    
+    // 创建烟花并添加到fireworks数组中
+    canvas.addEventListener("click", (e) => {
+        const firework = new Firework(e.clientX, e.clientY);
+        fireworks.push(firework);
     });
-
-    fireworks.forEach((firework, index) => {
-        if (firework.particles.length === 0) fireworks.splice(index, 1);
-    });
-
-    requestAnimationFrame(animate);
-}
-
-// 创建心形并添加到hearts数组中
-function createHeart() {
-    const heart = new Heart();
-    hearts.push(heart);
-}
-
-// 创建烟花并添加到fireworks数组中
-canvas.addEventListener("click", (e) => {
-    const firework = new Firework(e.clientX, e.clientY);
-    fireworks.push(firework);
-});
-
-// 开始动画
-createHeart();  // 创建心形动画
-animate();  // 启动动画循环
+    
+    // 开始动画
+    createHeart();  // 创建心形动画
+    animate();  // 启动动画循环
 
 </script>
 </body>
