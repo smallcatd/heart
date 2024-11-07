@@ -1,102 +1,98 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fireworks & Heart Animation</title>
-    <style>
-        body { margin: 0; padding: 0; background-color: black; }
-        canvas { display: block; }
-    </style>
-</head>
-<body>
-<canvas id="canvas"></canvas>
-<script>
-// Canvas setup
-const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d');
-canvas.width = 1080;
-canvas.height = 600;
-const CANVAS_WIDTH = canvas.width;
-const CANVAS_HEIGHT = canvas.height;
+const CANVAS_WIDTH = 1080;
+const CANVAS_HEIGHT = 600;
 const CANVAS_CENTER_X = CANVAS_WIDTH / 2;
 const CANVAS_CENTER_Y = CANVAS_HEIGHT / 2;
+const HEART_COLOR = "pink";
 
-// Heart function to calculate heart shape
-function heartFunction(t) {
-    const x = 16 * Math.pow(Math.sin(t), 3);
-    const y = -(13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t));
-    return {x: CANVAS_CENTER_X + x * 10, y: CANVAS_CENTER_Y + y * 10};
-}
+let fireworks = [];
 
-// Firework class for particles
 class Firework {
-    constructor() {
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
         this.particles = [];
+        this.color = "rgba(" + Math.floor(Math.random() * 255) + "," + Math.floor(Math.random() * 255) + "," + Math.floor(Math.random() * 255) + ", 1)";
         this.numParticles = 100;
-        this.color = "#" + Math.floor(Math.random()*16777215).toString(16); // random color
-        this.center = { x: Math.random() * CANVAS_WIDTH, y: Math.random() * CANVAS_HEIGHT };
-        this.status = 0;  // Time tracker for particles
-        this.maxStatus = 100;
-        this.explode();
+        for (let i = 0; i < this.numParticles; i++) {
+            this.particles.push(this.createParticle());
+        }
     }
 
-    // Generate particles
-    explode() {
-        const thetaStep = 2 * Math.PI / this.numParticles;
-        for (let i = 0; i < this.numParticles; i++) {
-            let t = Math.random() * 0.1; // Small random offset for each particle
-            let x = Math.cos(thetaStep * i + t) * 30 + this.center.x;
-            let y = Math.sin(thetaStep * i + t) * 30 + this.center.y;
-            this.particles.push({ x, y, speedX: Math.random() * 4 - 2, speedY: Math.random() * 4 - 2 });
-        }
+    createParticle() {
+        return {
+            x: this.x,
+            y: this.y,
+            speedX: Math.random() * 6 - 3,
+            speedY: Math.random() * 6 - 3,
+            size: Math.random() * 2 + 1,
+            opacity: 1,
+        };
     }
 
     update() {
-        if (this.status < this.maxStatus) {
-            this.status++;
-            for (let p of this.particles) {
-                p.x += p.speedX;
-                p.y += p.speedY;
-            }
-        }
+        this.particles.forEach(p => {
+            p.x += p.speedX;
+            p.y += p.speedY;
+            p.opacity *= 0.99;
+            p.size *= 0.98;
+        });
+        this.particles = this.particles.filter(p => p.opacity > 0.1);
     }
 
-    draw() {
-        ctx.fillStyle = this.color;
-        for (let p of this.particles) {
+    draw(ctx) {
+        this.particles.forEach(p => {
             ctx.beginPath();
-            ctx.arc(p.x, p.y, 2, 0, 2 * Math.PI);
+            ctx.arc(p.x, p.y, p.size, 0, 2 * Math.PI);
+            ctx.fillStyle = this.color;
             ctx.fill();
-        }
+        });
     }
 }
 
-// Animation loop
-let fireworks = [new Firework()];
+function heartFunction(t, sizeMultiplier = 1) {
+    const x = 16 * Math.pow(Math.sin(t), 3);
+    const y = -(13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t));
+    return {
+        x: CANVAS_CENTER_X + x * 10 * sizeMultiplier,
+        y: CANVAS_CENTER_Y + y * 10 * sizeMultiplier,
+    };
+}
 
-function animate() {
+function animate(ctx) {
     ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
-    // Draw heart
+    // Glow effect for heart
+    ctx.shadowBlur = 15;
+    ctx.shadowColor = "pink";
+    
     let t = performance.now() * 0.001;
-    let heartPoint = heartFunction(t);
-    ctx.fillStyle = "pink";
+    let heartPoint = heartFunction(t, Math.sin(t) * 0.3 + 1);  // Dynamic size
+
+    ctx.fillStyle = HEART_COLOR;
     ctx.beginPath();
     ctx.arc(heartPoint.x, heartPoint.y, 10, 0, 2 * Math.PI);
     ctx.fill();
 
-    // Update and draw fireworks
-    for (let firework of fireworks) {
+    // Fireworks
+    fireworks.forEach(firework => {
         firework.update();
-        firework.draw();
-    }
+        firework.draw(ctx);
+    });
 
-    requestAnimationFrame(animate);
+    ctx.shadowBlur = 0; // Reset shadow for other objects
+    requestAnimationFrame(() => animate(ctx));
 }
 
-// Start animation
-animate();
-</script>
-</body>
-</html>
+function createFireworks() {
+    for (let i = 0; i < 5; i++) {
+        let x = Math.random() * CANVAS_WIDTH;
+        let y = Math.random() * CANVAS_HEIGHT;
+        fireworks.push(new Firework(x, y));
+    }
+}
+
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+createFireworks();
+animate(ctx);
