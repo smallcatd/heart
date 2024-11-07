@@ -51,8 +51,7 @@ class Firework {
     }
 
     update() {
-        this.status += this.scaleSpeed; // 通过 scaleSpeed 控制绽放速度
-        if (this.status >= 1) this.status = 1; // 确保不会超过最大状态
+        this.status += 1; 
         for (let i = 0; i < this.particles.length; i++) {
             const [x, y] = this.particles[i];
             const scale = this.status;
@@ -63,7 +62,7 @@ class Firework {
             ctx.fillStyle = this.getColor();
             ctx.fill();
         }
-        return this.status < 1;
+        return this.status < 100;
     }
 
     getColor() {
@@ -117,7 +116,7 @@ const heart = new Heart();
 
 function loop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    if (fireworks.length < 1) {
+    if (fireworks.length < 2) {
         fireworks.push(new Firework(`#${Math.floor(Math.random() * 16777215).toString(16)}`, Math.random() * 2 + 1.5, canvas.width, canvas.height));
     }
     heart.render(Date.now() % 20);
